@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 // ── Save to Brand modal ───────────────────────────────────
 function SaveToBrandModal({ defaultBrandId, onSave, onClose }) {
@@ -13,7 +13,7 @@ function SaveToBrandModal({ defaultBrandId, onSave, onClose }) {
   const [error, setError]         = useState('')
 
   useEffect(() => {
-    axios.get('/api/brands').then(r => {
+    api.get('/api/brands').then(r => {
       setBrands(r.data)
       if (!defaultBrandId && r.data.length === 0) setMode('new')
     }).catch(() => setBrands([])).finally(() => setLoading(false))
@@ -31,7 +31,7 @@ function SaveToBrandModal({ defaultBrandId, onSave, onClose }) {
       let brandId = selectedId
       if (mode === 'new') {
         if (!newName.trim()) { setError('Enter a brand name.'); setSaving(false); return }
-        const { data } = await axios.post('/api/brands', { name: newName.trim() })
+        const { data } = await api.post('/api/brands', { name: newName.trim() })
         brandId = data.id
       }
       if (!brandId) { setError('Select a brand.'); setSaving(false); return }
@@ -267,7 +267,7 @@ export default function ImageGenerator() {
     setGptLabel({ icon: '⚡', label: "GPT's Prompt" })
 
     try {
-      const { data } = await axios.post('/api/generate-prompts', {
+      const { data } = await api.post('/api/generate-prompts', {
         concept, brief, hasProductImage: !!hasProductImage,
         templateStyle: template?.imageInstruction || null,
         templateAnalysis: template?.templateAnalysis || null
@@ -297,7 +297,7 @@ export default function ImageGenerator() {
     setImageUrl(null); setImageFilename(null)
     setBrandSaved(false)
     try {
-      const { data } = await axios.post('/api/generate-image', {
+      const { data } = await api.post('/api/generate-image', {
         visualDescription: activePrompt,
         brandName: brief.brandName,
         tone: Array.isArray(brief.toneOfVoice) ? brief.toneOfVoice.join(', ') : brief.toneOfVoice,
@@ -322,9 +322,9 @@ export default function ImageGenerator() {
   const handleSaveToBrand = async (targetBrandId) => {
     setShowBrandModal(false)
     try {
-      const brandRes = await axios.get(`/api/brands/${targetBrandId}`)
+      const brandRes = await api.get(`/api/brands/${targetBrandId}`)
       const bName = brandRes.data.name
-      await axios.post(`/api/brands/${targetBrandId}/sessions`, {
+      await api.post(`/api/brands/${targetBrandId}/sessions`, {
         brief,
         template: template || null,
         concept,

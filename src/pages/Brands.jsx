@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 // ── Create brand modal ────────────────────────────────────
 function CreateBrandModal({ onCreated, onClose }) {
@@ -19,7 +19,7 @@ function CreateBrandModal({ onCreated, onClose }) {
     setSaving(true)
     setError('')
     try {
-      const { data } = await axios.post('/api/brands', { name: name.trim() })
+      const { data } = await api.post('/api/brands', { name: name.trim() })
       onCreated(data)
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create brand.')
@@ -259,7 +259,7 @@ export default function Brands() {
   const fetchBrands = async () => {
     setLoading(true)
     try {
-      const { data } = await axios.get('/api/brands')
+      const { data } = await api.get('/api/brands')
       setBrands(data)
     } catch (_) {
       setBrands([])
@@ -271,7 +271,7 @@ export default function Brands() {
   // Fetch full brand data (with sessions) when expanding
   const fetchBrandFull = async (brandId) => {
     try {
-      const { data } = await axios.get(`/api/brands/${brandId}`)
+      const { data } = await api.get(`/api/brands/${brandId}`)
       setBrands(prev => prev.map(b => b.id === brandId ? { ...b, ...data } : b))
     } catch (_) {}
   }
@@ -292,7 +292,7 @@ export default function Brands() {
 
   const handleSessionDelete = async (brandId, sessionId) => {
     try {
-      await axios.delete(`/api/brands/${brandId}/sessions/${sessionId}`)
+      await api.delete(`/api/brands/${brandId}/sessions/${sessionId}`)
       setBrands(prev => prev.map(b => {
         if (b.id !== brandId) return b
         const sessions = (b.sessions || []).filter(s => s.id !== sessionId)
@@ -309,7 +309,7 @@ export default function Brands() {
 
   const handleBrandDelete = async (brandId) => {
     try {
-      await axios.delete(`/api/brands/${brandId}`)
+      await api.delete(`/api/brands/${brandId}`)
       setBrands(prev => prev.filter(b => b.id !== brandId))
     } catch (_) {}
   }

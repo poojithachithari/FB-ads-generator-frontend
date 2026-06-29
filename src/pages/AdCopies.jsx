@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 const STORAGE_KEY = 'fb_ads_copies'
 
@@ -247,7 +247,7 @@ export default function AdCopies() {
   useEffect(() => {
     if (template && !template.templateAnalysis && !templateAnalysis) {
       setAnalyzingTemplate(true)
-      axios.post('/api/analyze-template', {
+      api.post('/api/analyze-template', {
         imageUrl: template.imageUrl,
         templateName: template.name
       }).then(({ data }) => {
@@ -275,7 +275,7 @@ export default function AdCopies() {
     setGenerating(true)
     setGenError('')
     try {
-      const { data } = await axios.post('/api/generate-copy', {
+      const { data } = await api.post('/api/generate-copy', {
         brief,
         sessionId,
         templateAnalysis: templateAnalysis || null,

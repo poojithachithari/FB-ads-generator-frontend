@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 const STORAGE_KEY = 'fb_ads_brief'
 
@@ -117,7 +117,7 @@ export default function BriefForm() {
       productImages.forEach(({ file }) => formData.append('productImages', file))
 
       // Just upload images + save session — concept generation happens after template selection
-      const { data } = await axios.post('/api/save-brief', formData, {
+      const { data } = await api.post('/api/save-brief', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
 

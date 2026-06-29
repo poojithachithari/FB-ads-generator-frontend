@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 const STORAGE_KEY = 'fb_ads_template'
 
@@ -141,7 +141,7 @@ export default function TemplateSelect() {
   const fetchTemplates = async () => {
     setLoading(true)
     try {
-      const { data } = await axios.get('/api/ad-templates')
+      const { data } = await api.get('/api/ad-templates')
       setTemplates(data)
     } catch (_) {
       setTemplates([])
@@ -158,7 +158,7 @@ export default function TemplateSelect() {
 
     let templateAnalysis = null
     try {
-      const { data } = await axios.post('/api/analyze-template', {
+      const { data } = await api.post('/api/analyze-template', {
         imageUrl: template.imageUrl,
         templateName: template.name
       })
@@ -208,7 +208,7 @@ export default function TemplateSelect() {
       const fd = new FormData()
       fd.append('name',  newName.trim())
       fd.append('image', newFile)
-      const { data } = await axios.post('/api/ad-templates', fd, {
+      const { data } = await api.post('/api/ad-templates', fd, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setTemplates(prev => [...prev, data])
@@ -223,7 +223,7 @@ export default function TemplateSelect() {
   // ── Admin: delete template ────────────────────────────
   const handleDelete = async (template) => {
     try {
-      await axios.delete(`/api/ad-templates/${template.id}`)
+      await api.delete(`/api/ad-templates/${template.id}`)
       setTemplates(prev => prev.filter(t => t.id !== template.id))
     } catch (_) {}
     setConfirmTarget(null)

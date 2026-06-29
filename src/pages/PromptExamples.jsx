@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 /* ── Image dropzone ─────────────────────────────────────── */
 function ImageDropzone({ imageUrl, onFile }) {
@@ -219,7 +219,7 @@ export default function PromptExamples() {
   useEffect(() => { load() }, [])
 
   const load = async () => {
-    try { const { data } = await axios.get('/api/example-prompts'); setExamples(data) }
+    try { const { data } = await api.get('/api/example-prompts'); setExamples(data) }
     catch (_) {}
     finally { setLoading(false) }
   }
@@ -233,7 +233,7 @@ export default function PromptExamples() {
       fd.append('prompt', entry.prompt.trim())
       fd.append('label', entry.label.trim())
       if (file) fd.append('image', file)
-      const { data } = await axios.post('/api/example-prompts', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const { data } = await api.post('/api/example-prompts', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       setExamples(prev => [...prev, data])
       setShowAdd(false)
       showFlash('Example added ✓')
@@ -244,12 +244,12 @@ export default function PromptExamples() {
   const handleEdit = async (entry, file) => {
     setSaving(true)
     try {
-      await axios.put(`/api/example-prompts/${editTarget.id}`, entry)
+      await api.put(`/api/example-prompts/${editTarget.id}`, entry)
       if (file) {
         const fd = new FormData(); fd.append('image', file)
-        await axios.post(`/api/example-prompts/${editTarget.id}/image`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+        await api.post(`/api/example-prompts/${editTarget.id}/image`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       }
-      const { data } = await axios.get('/api/example-prompts')
+      const { data } = await api.get('/api/example-prompts')
       setExamples(data)
       setEditTarget(null)
       showFlash('Saved ✓')
@@ -259,7 +259,7 @@ export default function PromptExamples() {
 
   const handleDelete = async (id) => {
     if (!confirm('Remove this example?')) return
-    await axios.delete(`/api/example-prompts/${id}`)
+    await api.delete(`/api/example-prompts/${id}`)
     setExamples(prev => prev.filter(e => e.id !== id))
     showFlash('Removed')
   }

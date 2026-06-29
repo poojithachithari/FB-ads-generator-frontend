@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 function timeAgo(dateStr) {
   if (!dateStr) return ''
@@ -90,11 +90,11 @@ export default function Templates() {
     else setLoading(true)
     setError('')
     try {
-      const { data: list } = await axios.get('/api/sessions')
+      const { data: list } = await api.get('/api/sessions')
       const withImages = list.filter(s => s.hasGeneratedImages)
       setSessions(withImages)
       const detailResults = await Promise.all(
-        withImages.map(s => axios.get(`/api/sessions/${s.id}`).then(r => [s.id, r.data]))
+        withImages.map(s => api.get(`/api/sessions/${s.id}`).then(r => [s.id, r.data]))
       )
       setDetails(Object.fromEntries(detailResults))
     } catch (err) {
@@ -116,7 +116,7 @@ export default function Templates() {
     const session = details[sessionId]
     const concept = getConceptForImage(session, img)
     try {
-      const { data } = await axios.post('/api/generate-image', {
+      const { data } = await api.post('/api/generate-image', {
         visualDescription: editPrompt[imageKey] || img.prompt,
         brandName: session.brief?.brandName,
         tone: session.brief?.toneOfVoice,
@@ -126,7 +126,7 @@ export default function Templates() {
         hasProductImage: !!session.productImageUrl
       })
       setNewImages(prev => ({ ...prev, [imageKey]: data.imageUrl }))
-      const { data: updated } = await axios.get(`/api/sessions/${sessionId}`)
+      const { data: updated } = await api.get(`/api/sessions/${sessionId}`)
       setDetails(prev => ({ ...prev, [sessionId]: updated }))
     } catch (err) {
       setError('Regeneration failed: ' + (err.response?.data?.error || err.message))
@@ -160,8 +160,8 @@ export default function Templates() {
     setConfirmTarget(null)
     setDeleting(imageKey)
     try {
-      await axios.delete(`/api/sessions/${sessionId}/images/${imgIndex}`)
-      const { data: updated } = await axios.get(`/api/sessions/${sessionId}`)
+      await api.delete(`/api/sessions/${sessionId}/images/${imgIndex}`)
+      const { data: updated } = await api.get(`/api/sessions/${sessionId}`)
       setDetails(prev => ({ ...prev, [sessionId]: updated }))
       if (!updated.generatedImages?.length) {
         setSessions(prev => prev.filter(s => s.id !== sessionId))
